@@ -38,6 +38,15 @@ public class HabitacionRepository {
         return jdbcTemplate.query(sql, habitacionRowMapper);
     }
 
+    public Habitacion findById(int id) {
+        String sql = "SELECT * FROM habitacion WHERE id_habitacion = ?";
+        
+        return jdbcTemplate.queryForObject(
+            sql,
+            habitacionRowMapper,
+            id
+        );
+    }   
     public int save(Habitacion habitacion) {
         String sql = "INSERT INTO habitacion (numero, estado, id_tipo, id_sede) VALUES (:numero, :estado, :idTipo, :idSede)";
 

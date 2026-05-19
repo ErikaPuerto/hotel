@@ -1,7 +1,7 @@
 package com.hotel.controller;
 
 import com.hotel.model.Habitacion;
-import com.hotel.repository.HabitacionRepository;
+import com.hotel.service.HabitacionService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,16 +21,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/habitaciones")
 public class HabitacionController {
     
-    private final HabitacionRepository habitacionRepository;
+    private final HabitacionService habitacionService;
 
-    public HabitacionController(HabitacionRepository habitacionRepository) {
-        this.habitacionRepository = habitacionRepository;
-    }
+public HabitacionController(HabitacionService habitacionService) {
+    this.habitacionService = habitacionService;
+}
 
     // Get /habitaciones: devuelve la lista de todas las habitaciones en formato JSON
     @GetMapping
     public List<Habitacion> listarHabitaciones() {
-        return habitacionRepository.findAll();
+        return habitacionService.listarHabitaciones();
+    }
+    
+    @GetMapping("/{id}")
+    public Habitacion obtenerHabitacion(@PathVariable int id) {
+        return habitacionService.obtenerPorId(id);
     }
 
     @PostMapping
