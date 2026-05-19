@@ -1,5 +1,4 @@
 package com.hotel.repository;
-
 import com.hotel.model.Habitacion;
 import java.util.List;
 import org.springframework.jdbc.core.RowMapper;
