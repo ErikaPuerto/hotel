@@ -18,6 +18,10 @@ public class HabitacionService {
         return habitacionRepository.findAll();
     }
 
+    public List<Habitacion> listarDisponibles() {
+        return habitacionRepository.findDisponibles();
+    }
+
     public Habitacion obtenerPorId(int id) {
         return habitacionRepository.findById(id);
     }

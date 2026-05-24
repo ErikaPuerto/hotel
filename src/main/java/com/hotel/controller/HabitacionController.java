@@ -4,17 +4,12 @@ import com.hotel.model.Habitacion;
 import com.hotel.service.HabitacionService;
 import com.hotel.repository.HabitacionRepository;
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -34,6 +29,11 @@ public class HabitacionController {
     @GetMapping
     public List<Habitacion> listarHabitaciones() {
         return habitacionService.listarHabitaciones();
+    }
+
+    @GetMapping("/disponibles")
+    public List<Habitacion> listarDisponibles() {
+        return habitacionService.listarDisponibles();
     }
 
     @GetMapping("/{id}")

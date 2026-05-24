@@ -38,14 +38,33 @@ public class HabitacionRepository {
     }
 
     public Habitacion findById(int id) {
-        String sql = "SELECT * FROM habitacion WHERE id_habitacion = ?";
-        
+
+        String sql = """
+                SELECT *
+                FROM habitacion
+                WHERE id_habitacion = ?
+                """;
+    
         return jdbcTemplate.queryForObject(
-            sql,
-            habitacionRowMapper,
-            id
+                sql,
+                habitacionRowMapper,
+                id
         );
-    }   
+    } 
+
+    public List<Habitacion> findDisponibles() {
+
+        String sql = """
+                SELECT *
+                FROM vista_habitaciones_disponibles
+                """;
+    
+        return jdbcTemplate.query(
+                sql,
+                habitacionRowMapper
+        );
+    }
+
     public int save(Habitacion habitacion) {
         String sql = "INSERT INTO habitacion (numero, estado, id_tipo, id_sede) VALUES (:numero, :estado, :idTipo, :idSede)";
 
