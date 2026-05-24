@@ -68,4 +68,77 @@ public ReservaService(
     public int eliminarReserva(int id) {
         return repository.delete(id);
     }
+
+    public void realizarCheckIn(int idReserva) {
+
+        Reserva reserva = repository.findById(idReserva);
+    
+        // cambiar estado reserva
+    
+        reserva.setEstado("confirmada");
+    
+        repository.update(idReserva, reserva);
+    
+        // cambiar habitación a ocupada
+    
+        Habitacion habitacion =
+                habitacionRepository.findById(
+                        reserva.getIdHabitacion()
+                );
+    
+        habitacion.setEstado("ocupada");
+    
+        habitacionRepository.update(
+                habitacion.getIdHabitacion(),
+                habitacion
+        );
+    }
+    public void realizarCheckOut(int idReserva) {
+
+        Reserva reserva = repository.findById(idReserva);
+    
+        // finalizar reserva
+    
+        reserva.setEstado("finalizada");
+    
+        repository.update(idReserva, reserva);
+    
+        // liberar habitación
+    
+        Habitacion habitacion =
+                habitacionRepository.findById(
+                        reserva.getIdHabitacion()
+                );
+    
+        habitacion.setEstado("disponible");
+    
+        habitacionRepository.update(
+                habitacion.getIdHabitacion(),
+                habitacion
+        );
+    }
+    public void cancelarReserva(int idReserva) {
+
+        Reserva reserva = repository.findById(idReserva);
+    
+        // cancelar reserva
+    
+        reserva.setEstado("cancelada");
+    
+        repository.update(idReserva, reserva);
+    
+        // liberar habitación
+    
+        Habitacion habitacion =
+                habitacionRepository.findById(
+                        reserva.getIdHabitacion()
+                );
+    
+        habitacion.setEstado("disponible");
+    
+        habitacionRepository.update(
+                habitacion.getIdHabitacion(),
+                habitacion
+        );
+    }
 }

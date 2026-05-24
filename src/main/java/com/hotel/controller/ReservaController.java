@@ -69,6 +69,38 @@ public class ReservaController {
         return ResponseEntity.ok("Reserva actualizada");
     }
 
+    @PutMapping("/{id}/check-in")
+    public ResponseEntity<String> realizarCheckIn(
+            @PathVariable int id) {
+
+        service.realizarCheckIn(id);
+
+        return ResponseEntity.ok(
+                "Check-in realizado exitosamente"
+        );
+    }
+
+    @PutMapping("/{id}/check-out")
+    public ResponseEntity<String> realizarCheckOut(
+            @PathVariable int id) {
+
+        service.realizarCheckOut(id);
+
+        return ResponseEntity.ok(
+                "Check-out realizado exitosamente"
+        );
+    }
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<String> cancelarReserva(
+            @PathVariable int id) {
+
+        service.cancelarReserva(id);
+
+        return ResponseEntity.ok(
+                "Reserva cancelada exitosamente"
+        );
+    }
     // ELIMINAR
 
     @DeleteMapping("/{id}")
