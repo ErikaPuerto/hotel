@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <h1>🏨 Hotel Manager</h1>
+        <ul>
+            <li><a href="#" onclick="mostrarSeccion('clientes')">Clientes</a></li>
+            <li><a href="#" onclick="mostrarSeccion('habitaciones')">Habitaciones</a></li>
+            <li><a href="#" onclick="mostrarSeccion('reservas')">Reservas</a></li>
+            <li><a href="#" onclick="mostrarSeccion('reportes')">Reportes</a></li>
+        </ul>
+    </nav>
+
+    <main class="contenido">
+
+        <!-- CLIENTES -->
+        <section id="clientes" class="seccion">
+            <h2>Clientes</h2>
+            <button class="btn-primary" onclick="cargarClientes()">Actualizar</button>
+            <table id="tabla-clientes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Documento</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                    </tr>
+                </thead>
+                <tbody id="body-clientes"></tbody>
+            </table>
+        </section>
+
+        <!-- HABITACIONES -->
+        <section id="habitaciones" class="seccion oculto">
+            <h2>Habitaciones</h2>
+            <button class="btn-primary" onclick="cargarHabitaciones()">Actualizar</button>
+            <button class="btn-secondary" onclick="cargarDisponibles()">Ver disponibles</button>
+            <table id="tabla-habitaciones">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Número</th>
+                        <th>Estado</th>
+                        <th>Tipo</th>
+                        <th>Sede</th>
+                    </tr>
+                </thead>
+                <tbody id="body-habitaciones"></tbody>
+            </table>
+        </section>
+
+        <!-- RESERVAS -->
+        <section id="reservas" class="seccion oculto">
+            <h2>Reservas</h2>
+            <button class="btn-primary" onclick="cargarReservas()">Actualizar</button>
+            <table id="tabla-reservas">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Estado</th>
+                        <th>Cliente</th>
+                        <th>Habitación</th>
+                    </tr>
+                </thead>
+                <tbody id="body-reservas"></tbody>
+            </table>
+        </section>
+
+        <!-- REPORTES -->
+        <section id="reportes" class="seccion oculto">
+            <h2>Reportes</h2>
+            <div class="cards-container">
+                <div class="card" id="card-ingresos">
+                    <h3>💰 Ingresos</h3>
+                    <p>Cargando...</p>
+                </div>
+            </div>
+            <h3>Ocupación por habitación</h3>
+            <table id="tabla-ocupacion">
+                <thead>
+                    <tr>
+                        <th>Habitación</th>
+                        <th>Estado</th>
+                        <th>Total Reservas</th>
+                    </tr>
+                </thead>
+                <tbody id="body-ocupacion"></tbody>
+            </table>
+            <h3>Reservas por sede</h3>
+            <table id="tabla-sedes">
+                <thead>
+                    <tr>
+                        <th>Sede</th>
+                        <th>Total Reservas</th>
+                    </tr>
+                </thead>
+                <tbody id="body-sedes"></tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
