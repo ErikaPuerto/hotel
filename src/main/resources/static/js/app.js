@@ -1,113 +1,547 @@
-const API = 'http://localhost:8082';
+const API = "http://localhost:8082";
 
-// ── Navegación ──────────────────────────────────────
+//
+// INICIO
+//
 
-function mostrarSeccion(nombre) {
-    document.querySelectorAll('.seccion').forEach(s => s.classList.add('oculto'));
-    document.getElementById(nombre).classList.remove('oculto');
+window.onload = function () {
 
-    if (nombre === 'clientes') cargarClientes();
-    if (nombre === 'habitaciones') cargarHabitaciones();
-    if (nombre === 'reservas') cargarReservas();
-    if (nombre === 'reportes') cargarReportes();
+    mostrarSeccion("clientes");
+
+    aplicarPermisos();
+
+    cargarClientes();
+};
+
+//
+// CAMBIO DE SECCIÓN
+//
+
+function mostrarSeccion(id) {
+
+    const secciones =
+        document.querySelectorAll(".seccion");
+
+    secciones.forEach(seccion => {
+        seccion.classList.add("oculto");
+    });
+
+    document
+        .getElementById(id)
+        .classList.remove("oculto");
 }
 
-// ── Clientes ─────────────────────────────────────────
+//
+// ROLES
+//
+
+document
+    .getElementById("selectorRol")
+    .addEventListener("change", aplicarPermisos);
+
+function aplicarPermisos() {
+
+    const rol =
+        document.getElementById("selectorRol").value;
+
+    const botonesClientes =
+        document.querySelectorAll("#clientes button");
+
+    const botonesHabitaciones =
+        document.querySelectorAll("#habitaciones button");
+
+    const botonesReservas =
+        document.querySelectorAll("#reservas button");
+
+    const botonesPagos =
+        document.querySelectorAll("#pagos button");
+
+    //
+    // ADMIN
+    //
+
+    if (rol === "admin") {
+
+        habilitarTodo();
+
+        return;
+    }
+
+    //
+    // EMPLEADO
+    //
+
+    if (rol === "empleado") {
+
+        habilitarTodo();
+
+        botonesClientes.forEach(btn => {
+            btn.disabled = true;
+        });
+
+        return;
+    }
+
+    //
+    // CLIENTE
+    //
+
+    if (rol === "cliente") {
+
+        habilitarTodo();
+
+        botonesHabitaciones.forEach(btn => {
+            btn.disabled = true;
+        });
+
+        botonesPagos.forEach(btn => {
+            btn.disabled = true;
+        });
+
+        return;
+    }
+}
+
+function habilitarTodo() {
+
+    document
+        .querySelectorAll("button")
+        .forEach(btn => {
+            btn.disabled = false;
+        });
+}
+
+//
+// CLIENTES
+//
 
 async function cargarClientes() {
-    const res = await fetch(`${API}/clientes`);
-    const datos = await res.json();
-    const tbody = document.getElementById('body-clientes');
-    tbody.innerHTML = datos.map(c => `
-        <tr>
-            <td>${c.idCliente}</td>
-            <td>${c.usuario}</td>
-            <td>${c.documento}</td>
-            <td>${c.telefono}</td>
-            <td>${c.correo}</td>
-        </tr>
-    `).join('');
+
+    try {
+
+        const response =
+            await fetch(API + "/clientes");
+
+        const clientes =
+            await response.json();
+
+        let html = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Documento</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                </tr>
+        `;
+
+        clientes.forEach(cliente => {
+
+            html += `
+                <tr>
+                    <td>${cliente.idCliente}</td>
+                    <td>${cliente.usuario}</td>
+                    <td>${cliente.documento}</td>
+                    <td>${cliente.telefono}</td>
+                    <td>${cliente.correo}</td>
+                </tr>
+            `;
+        });
+
+        html += "</table>";
+
+        document.getElementById("tablaClientes")
+            .innerHTML = html;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error cargando clientes");
+    }
 }
 
-// ── Habitaciones ──────────────────────────────────────
+async function crearCliente() {
+
+    try {
+
+        const cliente = {
+
+            usuario:
+                document.getElementById("clienteUsuario").value,
+
+            documento:
+                document.getElementById("clienteDocumento").value,
+
+            telefono:
+                document.getElementById("clienteTelefono").value,
+
+            correo:
+                document.getElementById("clienteCorreo").value
+        };
+
+        const response = await fetch(API + "/clientes", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(cliente)
+        });
+
+        if (!response.ok) {
+
+            throw new Error("Error al crear cliente");
+        }
+
+        alert("Cliente creado");
+
+        limpiarFormularioClientes();
+
+        cargarClientes();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("No se pudo guardar el cliente");
+    }
+}
+
+function limpiarFormularioClientes() {
+
+    document.getElementById("clienteUsuario").value = "";
+    document.getElementById("clienteDocumento").value = "";
+    document.getElementById("clienteTelefono").value = "";
+    document.getElementById("clienteCorreo").value = "";
+}
+
+//
+// HABITACIONES
+//
 
 async function cargarHabitaciones() {
-    const res = await fetch(`${API}/habitaciones`);
-    const datos = await res.json();
-    mostrarHabitaciones(datos);
+
+    try {
+
+        const response =
+            await fetch(API + "/habitaciones");
+
+        const habitaciones =
+            await response.json();
+
+        let html = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Número</th>
+                    <th>Estado</th>
+                    <th>Tipo</th>
+                    <th>Sede</th>
+                </tr>
+        `;
+
+        habitaciones.forEach(habitacion => {
+
+            html += `
+                <tr>
+                    <td>${habitacion.idHabitacion}</td>
+                    <td>${habitacion.numero}</td>
+                    <td>${habitacion.estado}</td>
+                    <td>${habitacion.idTipo}</td>
+                    <td>${habitacion.idSede}</td>
+                </tr>
+            `;
+        });
+
+        html += "</table>";
+
+        document.getElementById("tablaHabitaciones")
+            .innerHTML = html;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error cargando habitaciones");
+    }
 }
 
-async function cargarDisponibles() {
-    const res = await fetch(`${API}/habitaciones/disponibles`);
-    const datos = await res.json();
-    mostrarHabitaciones(datos);
+async function crearHabitacion() {
+
+    try {
+
+        const habitacion = {
+
+            numero: parseInt(
+                document.getElementById("habitacionNumero").value
+            ),
+
+            estado:
+                document.getElementById("habitacionEstado").value,
+
+            idTipo: parseInt(
+                document.getElementById("habitacionTipo").value
+            ),
+
+            idSede: parseInt(
+                document.getElementById("habitacionSede").value
+            )
+        };
+
+        const response =
+            await fetch(API + "/habitaciones", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(habitacion)
+            });
+
+        if (!response.ok) {
+
+            throw new Error("Error al crear habitación");
+        }
+
+        alert("Habitación creada");
+
+        cargarHabitaciones();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("No se pudo guardar la habitación");
+    }
 }
 
-function mostrarHabitaciones(datos) {
-    const tbody = document.getElementById('body-habitaciones');
-    tbody.innerHTML = datos.map(h => `
-        <tr>
-            <td>${h.idHabitacion}</td>
-            <td>${h.numero}</td>
-            <td><span class="estado-${h.estado}">${h.estado}</span></td>
-            <td>${h.idTipo}</td>
-            <td>${h.idSede}</td>
-        </tr>
-    `).join('');
-}
-
-// ── Reservas ──────────────────────────────────────────
+//
+// RESERVAS
+//
 
 async function cargarReservas() {
-    const res = await fetch(`${API}/reservas`);
-    const datos = await res.json();
-    const tbody = document.getElementById('body-reservas');
-    tbody.innerHTML = datos.map(r => `
-        <tr>
-            <td>${r.idReserva}</td>
-            <td>${r.fechaInicio}</td>
-            <td>${r.fechaFin}</td>
-            <td>${r.estado}</td>
-            <td>${r.idCliente}</td>
-            <td>${r.idHabitacion}</td>
-        </tr>
-    `).join('');
+
+    try {
+
+        const response =
+            await fetch(API + "/reservas");
+
+        const reservas =
+            await response.json();
+
+        let html = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Estado</th>
+                    <th>Cliente</th>
+                    <th>Habitación</th>
+                    <th>Empleado</th>
+                </tr>
+        `;
+
+        reservas.forEach(reserva => {
+
+            html += `
+                <tr>
+                    <td>${reserva.idReserva}</td>
+                    <td>${reserva.fechaInicio}</td>
+                    <td>${reserva.fechaFin}</td>
+                    <td>${reserva.estado}</td>
+                    <td>${reserva.idCliente}</td>
+                    <td>${reserva.idHabitacion}</td>
+                    <td>${reserva.idEmpleado}</td>
+                </tr>
+            `;
+        });
+
+        html += "</table>";
+
+        document.getElementById("tablaReservas")
+            .innerHTML = html;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error cargando reservas");
+    }
 }
 
-// ── Reportes ──────────────────────────────────────────
+async function crearReserva() {
 
-async function cargarReportes() {
-    // Ingresos
-    const resIngresos = await fetch(`${API}/reportes/ingresos`);
-    const ingresos = await resIngresos.json();
-    document.getElementById('card-ingresos').innerHTML = `
-        <h3>💰 Ingresos</h3>
-        <p>Total pagos: <strong>${ingresos.totalPagos}</strong></p>
-        <p>Ingresos totales: <strong>$${ingresos.ingresosTotales}</strong></p>
-        <p>Promedio pago: <strong>$${ingresos.promedioPago}</strong></p>
-    `;
+    try {
 
-    // Ocupación
-    const resOcupacion = await fetch(`${API}/reportes/ocupacion`);
-    const ocupacion = await resOcupacion.json();
-    document.getElementById('body-ocupacion').innerHTML = ocupacion.map(o => `
-        <tr>
-            <td>${o.numero}</td>
-            <td>${o.estado}</td>
-            <td>${o.totalReservas}</td>
-        </tr>
-    `).join('');
+        const reserva = {
 
-    // Reservas por sede
-    const resSedes = await fetch(`${API}/reportes/reservas-sede`);
-    const sedes = await resSedes.json();
-    document.getElementById('body-sedes').innerHTML = sedes.map(s => `
-        <tr>
-            <td>${s.nombreSede}</td>
-            <td>${s.totalReservas}</td>
-        </tr>
-    `).join('');
+            fechaInicio:
+                document.getElementById("fechaInicio").value,
+
+            fechaFin:
+                document.getElementById("fechaFin").value,
+
+            estado:
+                document.getElementById("estadoReserva").value,
+
+            idCliente: parseInt(
+                document.getElementById("idClienteReserva").value
+            ),
+
+            idHabitacion: parseInt(
+                document.getElementById("idHabitacionReserva").value
+            ),
+
+            idEmpleado: parseInt(
+                document.getElementById("idEmpleadoReserva").value
+            )
+        };
+
+        const response =
+            await fetch(API + "/reservas", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(reserva)
+            });
+
+        if (!response.ok) {
+
+            throw new Error("Error al crear reserva");
+        }
+
+        alert("Reserva creada");
+
+        cargarReservas();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("No se pudo guardar la reserva");
+    }
 }
 
-// Cargar clientes al inicio
-mostrarSeccion('clientes');
+//
+// PAGOS
+//
+
+async function cargarPagos() {
+
+    try {
+
+        const response =
+            await fetch(API + "/pagos");
+
+        const pagos =
+            await response.json();
+
+        let html = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Método</th>
+                    <th>Reserva</th>
+                    <th>Cliente</th>
+                </tr>
+        `;
+
+        pagos.forEach(pago => {
+
+            html += `
+                <tr>
+                    <td>${pago.idPago}</td>
+                    <td>${pago.monto}</td>
+                    <td>${pago.fecha}</td>
+                    <td>${pago.estado}</td>
+                    <td>${pago.idMetodo}</td>
+                    <td>${pago.idReserva}</td>
+                    <td>${pago.idCliente}</td>
+                </tr>
+            `;
+        });
+
+        html += "</table>";
+
+        document.getElementById("tablaPagos")
+            .innerHTML = html;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error cargando pagos");
+    }
+}
+
+async function crearPago() {
+
+    try {
+
+        const pago = {
+
+            monto: parseFloat(
+                document.getElementById("montoPago").value
+            ),
+
+            fecha:
+                document.getElementById("fechaPago").value,
+
+            estado:
+                document.getElementById("estadoPago").value,
+
+            idMetodo: parseInt(
+                document.getElementById("idMetodoPago").value
+            ),
+
+            idReserva: parseInt(
+                document.getElementById("idReservaPago").value
+            ),
+
+            idCliente: parseInt(
+                document.getElementById("idClientePago").value
+            )
+        };
+
+        const response =
+            await fetch(API + "/pagos", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(pago)
+            });
+
+        if (!response.ok) {
+
+            throw new Error("Error al crear pago");
+        }
+
+        alert("Pago creado");
+
+        cargarPagos();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("No se pudo guardar el pago");
+    }
+}

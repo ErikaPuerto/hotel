@@ -4,7 +4,9 @@ public class Rol {
 
     private Integer idRol;
 
-    private String nombre;
+    private String nombreRol;
+
+    private String descripcion;
 
     // GETTERS
 
@@ -12,8 +14,12 @@ public class Rol {
         return idRol;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getNombreRol() {
+        return nombreRol;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
     }
 
     // SETTERS
@@ -22,7 +28,11 @@ public class Rol {
         this.idRol = idRol;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNombreRol(String nombreRol) {
+        this.nombreRol = nombreRol;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 }

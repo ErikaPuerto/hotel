@@ -7,10 +7,12 @@ import com.hotel.service.ReporteService;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/reportes")
+@CrossOrigin(origins = "*")
 public class ReporteController {
 
     private final ReporteService service;
@@ -19,24 +21,35 @@ public class ReporteController {
         this.service = service;
     }
 
-    @GetMapping("/ingresos")
-    public IngresosHotel obtenerIngresosHotel() {
+    // INGRESOS HOTEL
 
-        return service.obtenerIngresosHotel();
+    @GetMapping("/ingresos")
+    public ResponseEntity<IngresosHotel> obtenerIngresosHotel() {
+
+        return ResponseEntity.ok(
+                service.obtenerIngresosHotel()
+        );
     }
+
+    // OCUPACIÓN HABITACIONES
 
     @GetMapping("/ocupacion")
-    public List<OcupacionHabitacion>
+    public ResponseEntity<List<OcupacionHabitacion>>
     obtenerOcupacionHabitaciones() {
 
-        return service
-                .obtenerOcupacionHabitaciones();
+        return ResponseEntity.ok(
+                service.obtenerOcupacionHabitaciones()
+        );
     }
+
+    // RESERVAS POR SEDE
+
     @GetMapping("/reservas-sede")
-    public List<ReservasPorSede>
+    public ResponseEntity<List<ReservasPorSede>>
     obtenerReservasPorSede() {
 
-        return service
-                .obtenerReservasPorSede();
+        return ResponseEntity.ok(
+                service.obtenerReservasPorSede()
+        );
     }
 }

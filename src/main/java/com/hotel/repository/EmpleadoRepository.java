@@ -46,20 +46,12 @@ public class EmpleadoRepository {
                 rs.getString("nombre")
         );
 
-        empleado.setTelefono(
-                rs.getString("telefono")
-        );
-
-        empleado.setIdCargo(
-                rs.getInt("id_cargo")
+        empleado.setIdRol(
+                rs.getInt("id_rol")
         );
 
         empleado.setIdSede(
                 rs.getInt("id_sede")
-        );
-
-        empleado.setIdUsuario(
-                rs.getInt("id_usuario")
         );
 
         return empleado;
@@ -105,18 +97,14 @@ public class EmpleadoRepository {
                 INSERT INTO empleado
                 (
                     nombre,
-                    telefono,
-                    id_cargo,
-                    id_sede,
-                    id_usuario
+                    id_rol,
+                    id_sede
                 )
                 VALUES
                 (
                     :nombre,
-                    :telefono,
-                    :idCargo,
-                    :idSede,
-                    :idUsuario
+                    :idRol,
+                    :idSede
                 )
                 """;
 
@@ -129,23 +117,13 @@ public class EmpleadoRepository {
                 )
 
                 .addValue(
-                        "telefono",
-                        empleado.getTelefono()
-                )
-
-                .addValue(
-                        "idCargo",
-                        empleado.getIdCargo()
+                        "idRol",
+                        empleado.getIdRol()
                 )
 
                 .addValue(
                         "idSede",
                         empleado.getIdSede()
-                )
-
-                .addValue(
-                        "idUsuario",
-                        empleado.getIdUsuario()
                 );
 
         KeyHolder keyHolder =
@@ -174,10 +152,8 @@ public class EmpleadoRepository {
                 UPDATE empleado
                 SET
                     nombre = :nombre,
-                    telefono = :telefono,
-                    id_cargo = :idCargo,
-                    id_sede = :idSede,
-                    id_usuario = :idUsuario
+                    id_rol = :idRol,
+                    id_sede = :idSede
                 WHERE id_empleado = :id
                 """;
 
@@ -192,23 +168,13 @@ public class EmpleadoRepository {
                 )
 
                 .addValue(
-                        "telefono",
-                        empleado.getTelefono()
-                )
-
-                .addValue(
-                        "idCargo",
-                        empleado.getIdCargo()
+                        "idRol",
+                        empleado.getIdRol()
                 )
 
                 .addValue(
                         "idSede",
                         empleado.getIdSede()
-                )
-
-                .addValue(
-                        "idUsuario",
-                        empleado.getIdUsuario()
                 );
 
         return namedJdbc.update(

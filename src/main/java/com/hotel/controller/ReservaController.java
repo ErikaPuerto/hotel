@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/reservas")
+@CrossOrigin(origins = "*")
 public class ReservaController {
 
     private final ReservaService service;
@@ -24,15 +25,26 @@ public class ReservaController {
     // LISTAR
 
     @GetMapping
-    public List<Reserva> listarReservas() {
-        return service.listarReservas();
+    public ResponseEntity<List<Reserva>> listarReservas() {
+
+        return ResponseEntity.ok(
+                service.listarReservas()
+        );
     }
 
     // BUSCAR POR ID
 
     @GetMapping("/{id}")
-    public Reserva obtenerReserva(@PathVariable int id) {
-        return service.obtenerReserva(id);
+    public ResponseEntity<Reserva> obtenerReserva(
+            @PathVariable int id) {
+
+        Reserva reserva = service.obtenerReserva(id);
+
+        if (reserva == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(reserva);
     }
 
     // CREAR
@@ -66,8 +78,12 @@ public class ReservaController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok("Reserva actualizada");
+        return ResponseEntity.ok(
+                "Reserva actualizada"
+        );
     }
+
+    // CHECK-IN
 
     @PutMapping("/{id}/check-in")
     public ResponseEntity<String> realizarCheckIn(
@@ -80,6 +96,8 @@ public class ReservaController {
         );
     }
 
+    // CHECK-OUT
+
     @PutMapping("/{id}/check-out")
     public ResponseEntity<String> realizarCheckOut(
             @PathVariable int id) {
@@ -91,6 +109,8 @@ public class ReservaController {
         );
     }
 
+    // CANCELAR RESERVA
+
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<String> cancelarReserva(
             @PathVariable int id) {
@@ -101,6 +121,7 @@ public class ReservaController {
                 "Reserva cancelada exitosamente"
         );
     }
+
     // ELIMINAR
 
     @DeleteMapping("/{id}")
@@ -113,6 +134,8 @@ public class ReservaController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok("Reserva eliminada");
+        return ResponseEntity.ok(
+                "Reserva eliminada"
+        );
     }
 }

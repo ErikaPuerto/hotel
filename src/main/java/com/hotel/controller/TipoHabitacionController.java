@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/tipos-habitacion")
+@CrossOrigin(origins = "*")
 public class TipoHabitacionController {
 
     private final TipoHabitacionService service;
@@ -24,15 +25,27 @@ public class TipoHabitacionController {
     // LISTAR
 
     @GetMapping
-    public List<TipoHabitacion> listarTipos() {
-        return service.listarTipos();
+    public ResponseEntity<List<TipoHabitacion>> listarTipos() {
+
+        return ResponseEntity.ok(
+                service.listarTipos()
+        );
     }
 
     // BUSCAR POR ID
 
     @GetMapping("/{id}")
-    public TipoHabitacion obtenerTipo(@PathVariable int id) {
-        return service.obtenerTipo(id);
+    public ResponseEntity<TipoHabitacion> obtenerTipo(
+            @PathVariable int id) {
+
+        TipoHabitacion tipo =
+                service.obtenerTipo(id);
+
+        if (tipo == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(tipo);
     }
 
     // CREAR
@@ -41,12 +54,18 @@ public class TipoHabitacionController {
     public ResponseEntity<Map<String, Object>> crearTipo(
             @RequestBody TipoHabitacion tipo) {
 
-        int idGenerado = service.crearTipo(tipo);
+        int idGenerado =
+                service.crearTipo(tipo);
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response =
+                new HashMap<>();
 
         response.put("id", idGenerado);
-        response.put("mensaje", "Tipo de habitación creado");
+
+        response.put(
+                "mensaje",
+                "Tipo de habitación creado"
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -60,13 +79,16 @@ public class TipoHabitacionController {
             @PathVariable int id,
             @RequestBody TipoHabitacion tipo) {
 
-        int filas = service.actualizarTipo(id, tipo);
+        int filas =
+                service.actualizarTipo(id, tipo);
 
         if (filas == 0) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok("Tipo actualizado");
+        return ResponseEntity.ok(
+                "Tipo actualizado"
+        );
     }
 
     // ELIMINAR
@@ -75,12 +97,15 @@ public class TipoHabitacionController {
     public ResponseEntity<String> eliminarTipo(
             @PathVariable int id) {
 
-        int filas = service.eliminarTipo(id);
+        int filas =
+                service.eliminarTipo(id);
 
         if (filas == 0) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok("Tipo eliminado");
+        return ResponseEntity.ok(
+                "Tipo eliminado"
+        );
     }
 }

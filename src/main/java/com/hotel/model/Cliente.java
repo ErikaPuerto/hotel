@@ -8,6 +8,27 @@ public class Cliente {
     private String telefono;
     private String correo;
 
+    // CONSTRUCTOR VACÍO
+
+    public Cliente() {
+    }
+
+    // CONSTRUCTOR COMPLETO
+
+    public Cliente(
+            Integer idCliente,
+            String usuario,
+            String documento,
+            String telefono,
+            String correo
+    ) {
+        this.idCliente = idCliente;
+        this.usuario = usuario;
+        this.documento = documento;
+        this.telefono = telefono;
+        this.correo = correo;
+    }
+
     // GETTERS
 
     public Integer getIdCliente() {

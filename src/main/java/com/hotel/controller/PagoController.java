@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/pagos")
+@CrossOrigin(origins = "*")
 public class PagoController {
 
     private final PagoService service;
@@ -24,15 +25,22 @@ public class PagoController {
     // LISTAR
 
     @GetMapping
-    public List<Pago> listarPagos() {
-        return service.listarPagos();
+    public ResponseEntity<List<Pago>> listarPagos() {
+        return ResponseEntity.ok(service.listarPagos());
     }
 
     // BUSCAR POR ID
 
     @GetMapping("/{id}")
-    public Pago obtenerPago(@PathVariable int id) {
-        return service.obtenerPago(id);
+    public ResponseEntity<Pago> obtenerPago(@PathVariable int id) {
+
+        Pago pago = service.obtenerPago(id);
+
+        if (pago == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(pago);
     }
 
     // CREAR

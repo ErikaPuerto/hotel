@@ -9,11 +9,11 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/usuarios")
+@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     private final UsuarioService service;
@@ -28,19 +28,31 @@ public class UsuarioController {
     // GET ALL
 
     @GetMapping
-    public List<Usuario> listarUsuarios() {
+    public ResponseEntity<List<Usuario>> listarUsuarios() {
 
-        return service.listarUsuarios();
+        return ResponseEntity.ok(
+                service.listarUsuarios()
+        );
     }
 
     // GET BY ID
 
     @GetMapping("/{id}")
-    public Usuario buscarPorId(
+    public ResponseEntity<Usuario> buscarPorId(
             @PathVariable int id
     ) {
 
-        return service.buscarPorId(id);
+        Usuario usuario =
+                service.buscarPorId(id);
+
+        if (usuario == null) {
+
+            return ResponseEntity
+                    .notFound()
+                    .build();
+        }
+
+        return ResponseEntity.ok(usuario);
     }
 
     // POST

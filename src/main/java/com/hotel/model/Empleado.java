@@ -6,13 +6,9 @@ public class Empleado {
 
     private String nombre;
 
-    private String telefono;
-
-    private Integer idCargo;
+    private Integer idRol;
 
     private Integer idSede;
-
-    private Integer idUsuario;
 
     // GETTERS
 
@@ -24,20 +20,12 @@ public class Empleado {
         return nombre;
     }
 
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public Integer getIdCargo() {
-        return idCargo;
+    public Integer getIdRol() {
+        return idRol;
     }
 
     public Integer getIdSede() {
         return idSede;
-    }
-
-    public Integer getIdUsuario() {
-        return idUsuario;
     }
 
     // SETTERS
@@ -50,19 +38,11 @@ public class Empleado {
         this.nombre = nombre;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public void setIdCargo(Integer idCargo) {
-        this.idCargo = idCargo;
+    public void setIdRol(Integer idRol) {
+        this.idRol = idRol;
     }
 
     public void setIdSede(Integer idSede) {
         this.idSede = idSede;
-    }
-
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
     }
 }
