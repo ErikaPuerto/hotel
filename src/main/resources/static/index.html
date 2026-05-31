@@ -5,206 +5,310 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotel Manager</title>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
 
-    <div class="container">
+    <!-- MODAL EDICIÓN -->
+    <div id="modal" class="modal-overlay oculto">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitulo">Editar</h3>
+                <button class="modal-close" onclick="cerrarModal()">✕</button>
+            </div>
+            <div id="modalCuerpo"></div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-guardar" id="btnGuardarModal">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
 
-        <header>
-            <h1>HOTEL MANAGER</h1>
+    <!-- TOAST -->
+    <div id="toast" class="toast oculto"></div>
 
-            <div class="usuario-box">
-                <label>Rol:</label>
+    <div class="layout">
 
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-icon">⬡</span>
+                <span class="brand-name">HOTEL<br><em>MANAGER</em></span>
+            </div>
+
+            <div class="rol-box">
+                <label class="rol-label">Sesión como</label>
                 <select id="selectorRol">
                     <option value="admin">Administrador</option>
                     <option value="empleado">Empleado</option>
                     <option value="cliente">Cliente</option>
                 </select>
             </div>
-        </header>
 
-        <nav>
-            <button onclick="mostrarSeccion('clientes')">Clientes</button>
-            <button onclick="mostrarSeccion('habitaciones')">Habitaciones</button>
-            <button onclick="mostrarSeccion('reservas')">Reservas</button>
-            <button onclick="mostrarSeccion('pagos')">Pagos</button>
-        </nav>
-
-        <main>
-
-            <!-- CLIENTES -->
-
-            <section id="clientes" class="seccion oculto">
-
-                <h2>Clientes</h2>
-
-                <button onclick="cargarClientes()">
-                    Cargar Clientes
+            <nav class="sidenav">
+                <button class="nav-btn active" data-seccion="clientes" onclick="cambiarSeccion('clientes', this)">
+                    <span class="nav-icon">👤</span> Clientes
                 </button>
+                <button class="nav-btn" data-seccion="habitaciones" onclick="cambiarSeccion('habitaciones', this)">
+                    <span class="nav-icon">🛏</span> Habitaciones
+                </button>
+                <button class="nav-btn" data-seccion="reservas" onclick="cambiarSeccion('reservas', this)">
+                    <span class="nav-icon">📅</span> Reservas
+                </button>
+                <button class="nav-btn" data-seccion="pagos" onclick="cambiarSeccion('pagos', this)">
+                    <span class="nav-icon">💳</span> Pagos
+                </button>
+                <button class="nav-btn nav-admin" data-seccion="empleados" onclick="cambiarSeccion('empleados', this)">
+                    <span class="nav-icon">👷</span> Empleados
+                </button>
+                <button class="nav-btn nav-admin" data-seccion="reportes" onclick="cambiarSeccion('reportes', this)">
+                    <span class="nav-icon">📊</span> Reportes
+                </button>
+            </nav>
+        </aside>
 
-                <div class="formulario">
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content">
 
-                    <input type="text"
-                           id="clienteUsuario"
-                           placeholder="Usuario">
-
-                    <input type="text"
-                           id="clienteDocumento"
-                           placeholder="Documento">
-
-                    <input type="text"
-                           id="clienteTelefono"
-                           placeholder="Teléfono">
-
-                    <input type="email"
-                           id="clienteCorreo"
-                           placeholder="Correo">
-
-                    <button onclick="crearCliente()">
-                        Guardar Cliente
-                    </button>
-
+            <!-- ===================== CLIENTES ===================== -->
+            <section id="clientes" class="seccion">
+                <div class="seccion-header">
+                    <h2>Clientes</h2>
+                    <button class="btn-primary" onclick="abrirFormCliente()">+ Nuevo cliente</button>
                 </div>
 
-                <div id="tablaClientes"></div>
+                <div id="formCliente" class="form-card oculto">
+                    <h4>Registrar cliente</h4>
+                    <div class="form-grid">
+                        <input type="text" id="clienteUsuario" placeholder="Usuario">
+                        <input type="text" id="clienteDocumento" placeholder="Documento">
+                        <input type="text" id="clienteTelefono" placeholder="Teléfono">
+                        <input type="email" id="clienteCorreo" placeholder="Correo">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-ghost" onclick="cerrarFormCliente()">Cancelar</button>
+                        <button class="btn-primary" onclick="crearCliente()">Guardar</button>
+                    </div>
+                </div>
 
+                <div class="tabla-wrap">
+                    <table id="tablaClientes">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Usuario</th><th>Documento</th>
+                                <th>Teléfono</th><th>Correo</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyClientes"></tbody>
+                    </table>
+                </div>
             </section>
 
-            <!-- HABITACIONES -->
-
+            <!-- ===================== HABITACIONES ===================== -->
             <section id="habitaciones" class="seccion oculto">
-
-                <h2>Habitaciones</h2>
-
-                <button onclick="cargarHabitaciones()">
-                    Cargar Habitaciones
-                </button>
-
-                <div class="formulario">
-
-                    <input type="number"
-                           id="habitacionNumero"
-                           placeholder="Número">
-
-                    <input type="text"
-                           id="habitacionEstado"
-                           placeholder="Estado">
-
-                    <input type="number"
-                           id="habitacionTipo"
-                           placeholder="ID Tipo">
-
-                    <input type="number"
-                           id="habitacionSede"
-                           placeholder="ID Sede">
-
-                    <button onclick="crearHabitacion()">
-                        Guardar Habitación
-                    </button>
-
+                <div class="seccion-header">
+                    <h2>Habitaciones</h2>
+                    <div style="display:flex;gap:8px">
+                        <button class="btn-ghost" onclick="cargarHabitacionesDisponibles()">Ver disponibles</button>
+                        <button class="btn-primary nav-admin" onclick="abrirFormHabitacion()">+ Nueva</button>
+                    </div>
                 </div>
 
-                <div id="tablaHabitaciones"></div>
+                <div id="formHabitacion" class="form-card oculto nav-admin">
+                    <h4>Registrar habitación</h4>
+                    <div class="form-grid">
+                        <input type="number" id="habitacionNumero" placeholder="Número">
+                        <select id="habitacionEstado">
+                            <option value="disponible">Disponible</option>
+                            <option value="ocupada">Ocupada</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                        </select>
+                        <input type="number" id="habitacionTipo" placeholder="ID Tipo">
+                        <input type="number" id="habitacionSede" placeholder="ID Sede">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-ghost" onclick="cerrarFormHabitacion()">Cancelar</button>
+                        <button class="btn-primary" onclick="crearHabitacion()">Guardar</button>
+                    </div>
+                </div>
 
+                <div class="tabla-wrap">
+                    <table id="tablaHabitaciones">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Número</th><th>Estado</th>
+                                <th>Tipo</th><th>Sede</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyHabitaciones"></tbody>
+                    </table>
+                </div>
             </section>
 
-            <!-- RESERVAS -->
-
+            <!-- ===================== RESERVAS ===================== -->
             <section id="reservas" class="seccion oculto">
-
-                <h2>Reservas</h2>
-
-                <button onclick="cargarReservas()">
-                    Cargar Reservas
-                </button>
-
-                <div class="formulario">
-
-                    <input type="date" id="fechaInicio">
-
-                    <input type="date" id="fechaFin">
-
-                    <input type="text"
-                           id="estadoReserva"
-                           placeholder="Estado">
-
-                    <input type="number"
-                           id="idClienteReserva"
-                           placeholder="ID Cliente">
-
-                    <input type="number"
-                           id="idHabitacionReserva"
-                           placeholder="ID Habitación">
-
-                    <input type="number"
-                           id="idEmpleadoReserva"
-                           placeholder="ID Empleado">
-
-                    <button onclick="crearReserva()">
-                        Guardar Reserva
-                    </button>
-
+                <div class="seccion-header">
+                    <h2>Reservas</h2>
+                    <button class="btn-primary" onclick="abrirFormReserva()">+ Nueva reserva</button>
                 </div>
 
-                <div id="tablaReservas"></div>
+                <div id="formReserva" class="form-card oculto">
+                    <h4>Nueva reserva</h4>
+                    <div class="form-grid">
+                        <div>
+                            <label class="field-label">Fecha inicio</label>
+                            <input type="date" id="fechaInicio">
+                        </div>
+                        <div>
+                            <label class="field-label">Fecha fin</label>
+                            <input type="date" id="fechaFin">
+                        </div>
+                        <input type="number" id="idClienteReserva" placeholder="ID Cliente">
+                        <input type="number" id="idHabitacionReserva" placeholder="ID Habitación">
+                        <input type="number" id="idEmpleadoReserva" placeholder="ID Empleado">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-ghost" onclick="cerrarFormReserva()">Cancelar</button>
+                        <button class="btn-primary" onclick="crearReserva()">Guardar</button>
+                    </div>
+                </div>
 
+                <div class="tabla-wrap">
+                    <table id="tablaReservas">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Inicio</th><th>Fin</th><th>Estado</th>
+                                <th>Cliente</th><th>Habitación</th><th>Empleado</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyReservas"></tbody>
+                    </table>
+                </div>
             </section>
 
-            <!-- PAGOS -->
-
+            <!-- ===================== PAGOS ===================== -->
             <section id="pagos" class="seccion oculto">
-
-                <h2>Pagos</h2>
-
-                <button onclick="cargarPagos()">
-                    Cargar Pagos
-                </button>
-
-                <div class="formulario">
-
-                    <input type="number"
-                           id="montoPago"
-                           placeholder="Monto">
-
-                    <input type="date"
-                           id="fechaPago">
-
-                    <input type="text"
-                           id="estadoPago"
-                           placeholder="Estado">
-
-                    <input type="number"
-                           id="idMetodoPago"
-                           placeholder="ID Método">
-
-                    <input type="number"
-                           id="idReservaPago"
-                           placeholder="ID Reserva">
-
-                    <input type="number"
-                           id="idClientePago"
-                           placeholder="ID Cliente">
-
-                    <button onclick="crearPago()">
-                        Guardar Pago
-                    </button>
-
+                <div class="seccion-header">
+                    <h2>Pagos</h2>
+                    <button class="btn-primary nav-admin-empleado" onclick="abrirFormPago()">+ Registrar pago</button>
                 </div>
 
-                <div id="tablaPagos"></div>
+                <div id="formPago" class="form-card oculto nav-admin-empleado">
+                    <h4>Registrar pago</h4>
+                    <div class="form-grid">
+                        <input type="number" step="0.01" id="montoPago" placeholder="Monto">
+                        <div>
+                            <label class="field-label">Fecha</label>
+                            <input type="date" id="fechaPago">
+                        </div>
+                        <input type="number" id="idMetodoPago" placeholder="ID Método de pago">
+                        <input type="number" id="idReservaPago" placeholder="ID Reserva">
+                        <input type="number" id="idClientePago" placeholder="ID Cliente">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-ghost" onclick="cerrarFormPago()">Cancelar</button>
+                        <button class="btn-primary" onclick="crearPago()">Guardar</button>
+                    </div>
+                </div>
 
+                <div class="tabla-wrap">
+                    <table id="tablaPagos">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Monto</th><th>Fecha</th><th>Estado</th>
+                                <th>Método</th><th>Reserva</th><th>Cliente</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyPagos"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===================== EMPLEADOS ===================== -->
+            <section id="empleados" class="seccion oculto">
+                <div class="seccion-header">
+                    <h2>Empleados</h2>
+                    <button class="btn-primary" onclick="abrirFormEmpleado()">+ Nuevo empleado</button>
+                </div>
+
+                <div id="formEmpleado" class="form-card oculto">
+                    <h4>Registrar empleado</h4>
+                    <div class="form-grid">
+                        <input type="text" id="empleadoNombre" placeholder="Nombre completo">
+                        <input type="number" id="empleadoRol" placeholder="ID Rol">
+                        <input type="number" id="empleadoSede" placeholder="ID Sede">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-ghost" onclick="cerrarFormEmpleado()">Cancelar</button>
+                        <button class="btn-primary" onclick="crearEmpleado()">Guardar</button>
+                    </div>
+                </div>
+
+                <div class="tabla-wrap">
+                    <table id="tablaEmpleados">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Nombre</th><th>ID Rol</th><th>ID Sede</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyEmpleados"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===================== REPORTES ===================== -->
+            <section id="reportes" class="seccion oculto">
+                <div class="seccion-header">
+                    <h2>Reportes</h2>
+                    <button class="btn-primary" onclick="cargarReportes()">↻ Actualizar</button>
+                </div>
+
+                <div class="reportes-grid">
+
+                    <div class="reporte-card" id="cardIngresos">
+                        <h4>Ingresos del hotel</h4>
+                        <div id="ingresosTotales" class="reporte-loading">Cargando...</div>
+                    </div>
+
+                    <div class="reporte-card wide" id="cardOcupacion">
+                        <h4>Ocupación por habitación</h4>
+                        <div class="tabla-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th><th>Número</th><th>Estado</th><th>Total reservas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyOcupacion"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="reporte-card wide" id="cardSedes">
+                        <h4>Reservas por sede</h4>
+                        <div class="tabla-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID Sede</th><th>Nombre</th><th>Total reservas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodySedes"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
             </section>
 
         </main>
-
     </div>
 
     <script src="js/app.js"></script>
 
 </body>
-
 </html>

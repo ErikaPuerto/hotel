@@ -2,7 +2,9 @@ package com.hotel.service;
 
 import com.hotel.model.TipoHabitacion;
 import com.hotel.repository.TipoHabitacionRepository;
+
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +21,11 @@ public class TipoHabitacionService {
     }
 
     public TipoHabitacion obtenerTipo(int id) {
-        return repository.findById(id);
+        try {
+            return repository.findById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public int crearTipo(TipoHabitacion tipo) {

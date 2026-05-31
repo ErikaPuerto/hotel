@@ -166,31 +166,32 @@ public class ReservaRepository {
         );
     }
 
+    // VERIFICAR DISPONIBILIDAD
+
     public boolean habitacionDisponible(
-        int idHabitacion,
-        java.time.LocalDate fechaInicio,
-        java.time.LocalDate fechaFin
-) {
+            int idHabitacion,
+            java.time.LocalDate fechaInicio,
+            java.time.LocalDate fechaFin) {
 
-    String sql = """
-            SELECT COUNT(*)
-            FROM reserva
-            WHERE id_habitacion = ?
-            AND estado != 'cancelada'
-            AND (
-                fecha_inicio <= ?
-                AND fecha_fin >= ?
-            )
-            """;
+        String sql = """
+                SELECT COUNT(*)
+                FROM reserva
+                WHERE id_habitacion = ?
+                AND estado != 'cancelada'
+                AND (
+                    fecha_inicio <= ?
+                    AND fecha_fin >= ?
+                )
+                """;
 
-    Integer cantidad = jdbcTemplate.queryForObject(
-            sql,
-            Integer.class,
-            idHabitacion,
-            fechaFin,
-            fechaInicio
-    );
+        Integer cantidad = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                idHabitacion,
+                fechaFin,
+                fechaInicio
+        );
 
-    return cantidad == 0;
-}
+        return cantidad == 0;
+    }
 }

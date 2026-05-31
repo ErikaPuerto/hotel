@@ -12,53 +12,31 @@ public class UsuarioService {
 
     private final UsuarioRepository repository;
 
-    public UsuarioService(
-            UsuarioRepository repository
-    ) {
-
+    public UsuarioService(UsuarioRepository repository) {
         this.repository = repository;
     }
 
-    // LISTAR
-
     public List<Usuario> listarUsuarios() {
-
         return repository.findAll();
     }
 
-    // BUSCAR POR ID
-
     public Usuario buscarPorId(int id) {
-
-        return repository.findById(id);
+        try {
+            return repository.findById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    // CREAR
-
-    public int crearUsuario(
-            Usuario usuario
-    ) {
-
+    public int crearUsuario(Usuario usuario) {
         return repository.save(usuario);
     }
 
-    // ACTUALIZAR
-
-    public int actualizarUsuario(
-            int id,
-            Usuario usuario
-    ) {
-
-        return repository.update(
-                id,
-                usuario
-        );
+    public int actualizarUsuario(int id, Usuario usuario) {
+        return repository.update(id, usuario);
     }
 
-    // ELIMINAR
-
     public int eliminarUsuario(int id) {
-
         return repository.delete(id);
     }
 }

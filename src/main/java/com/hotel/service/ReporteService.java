@@ -2,8 +2,8 @@ package com.hotel.service;
 
 import com.hotel.model.IngresosHotel;
 import com.hotel.model.OcupacionHabitacion;
-import com.hotel.repository.ReporteRepository;
 import com.hotel.model.ReservasPorSede;
+import com.hotel.repository.ReporteRepository;
 
 import java.util.List;
 
@@ -22,17 +22,11 @@ public class ReporteService {
         return repository.obtenerIngresosHotel();
     }
 
-    public List<OcupacionHabitacion>
-    obtenerOcupacionHabitaciones() {
-
-        return repository
-                .obtenerOcupacionHabitaciones();
+    public List<OcupacionHabitacion> obtenerOcupacionHabitaciones() {
+        return repository.obtenerOcupacionHabitaciones();
     }
 
-    public List<ReservasPorSede>
-    obtenerReservasPorSede() {
-
-        return repository
-                .obtenerReservasPorSede();
+    public List<ReservasPorSede> obtenerReservasPorSede() {
+        return repository.obtenerReservasPorSede();
     }
 }
