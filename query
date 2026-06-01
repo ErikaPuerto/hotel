@@ -1,0 +1,897 @@
+CREATE TABLE Sede_Hotel (
+    id_sede SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    direccion VARCHAR(100) NOT NULL,
+    telefono VARCHAR(20) NOT NULL  -- corregido a VARCHAR
+);
+
+CREATE TABLE Rol (
+    id_rol SERIAL PRIMARY KEY,
+    nombre_rol VARCHAR(100) NOT NULL,       -- ej: Recepcionista, Ama de llaves, Gerente
+    descripcion VARCHAR(255)                -- qué hace ese rol
+);
+
+CREATE TABLE Empleado (
+    id_empleado SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    id_rol INT NOT NULL REFERENCES Rol(id_rol),        -- normalizado
+    id_sede INT NOT NULL REFERENCES Sede_Hotel(id_sede)
+);
+
+CREATE TABLE Cliente (
+    id_cliente SERIAL PRIMARY KEY,
+    usuario VARCHAR(100) NOT NULL,
+    documento VARCHAR(20) NOT NULL,         -- corregido a VARCHAR
+    telefono VARCHAR(20) NOT NULL,          -- corregido a VARCHAR
+    correo VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Tipo_Habitacion (
+    id_tipo SERIAL PRIMARY KEY,
+    nombre_tipo VARCHAR(100) NOT NULL,      -- ej: Simple, Doble, Suite
+    precio_base INT NOT NULL,
+    capacidad INT NOT NULL
+);
+
+CREATE TABLE Habitacion (
+    id_habitacion SERIAL PRIMARY KEY,
+    numero INT NOT NULL,
+    estado VARCHAR(50) NOT NULL,            -- ej: Disponible, Ocupada, Mantenimiento
+    id_tipo INT NOT NULL REFERENCES Tipo_Habitacion(id_tipo),
+    id_sede INT NOT NULL REFERENCES Sede_Hotel(id_sede)
+);
+
+-- RESERVAS Y PAGOS
+
+CREATE TABLE Reserva (
+    id_reserva SERIAL PRIMARY KEY,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    estado VARCHAR(50) NOT NULL,            -- ej: Pendiente, Confirmada, Cancelada
+    id_cliente INT NOT NULL REFERENCES Cliente(id_cliente),
+    id_habitacion INT NOT NULL REFERENCES Habitacion(id_habitacion),
+    id_empleado INT REFERENCES Empleado(id_empleado)  -- empleado que gestionó la reserva
+);
+
+CREATE TABLE MetodoPago (
+    id_metodo SERIAL PRIMARY KEY,
+    tipo VARCHAR(100) NOT NULL              -- ej: Efectivo, Tarjeta, Transferencia
+);
+
+CREATE TABLE Pago (
+    id_pago SERIAL PRIMARY KEY,
+    monto INT NOT NULL,
+    fecha DATE NOT NULL,
+    estado VARCHAR(50) NOT NULL,            -- ej: Pagado, Pendiente, Reembolsado
+    id_metodo INT NOT NULL REFERENCES MetodoPago(id_metodo),
+    id_reserva INT NOT NULL REFERENCES Reserva(id_reserva),
+    id_cliente INT NOT NULL REFERENCES Cliente(id_cliente)
+);
+
+-- SERVICIOS (catálogo independiente)
+
+CREATE TABLE Servicio (
+    id_servicio SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,           -- ej: Spa, Desayuno, Lavandería, Tour
+    descripcion VARCHAR(255),
+    costo INT NOT NULL
+);
+
+-- Relación muchos a muchos: una reserva puede tener varios servicios
+CREATE TABLE Reserva_Servicio (
+    id SERIAL PRIMARY KEY,
+    id_reserva INT NOT NULL REFERENCES Reserva(id_reserva),
+    id_servicio INT NOT NULL REFERENCES Servicio(id_servicio),
+    cantidad INT DEFAULT 1,
+    fecha_solicitud DATE
+);
+
+-- QUÉ HACEN LOS EMPLEADOS: operaciones/tareas registradas
+
+CREATE TABLE Tipo_Operacion (
+    id_operacion SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,           -- ej: Check-in, Check-out, Limpieza, Mantenimiento
+    descripcion VARCHAR(255)
+);
+
+CREATE TABLE Asignacion_Tarea (
+    id_tarea SERIAL PRIMARY KEY,
+    id_empleado INT NOT NULL REFERENCES Empleado(id_empleado),
+    id_operacion INT NOT NULL REFERENCES Tipo_Operacion(id_operacion),
+    id_reserva INT REFERENCES Reserva(id_reserva),      -- opcional: tarea ligada a reserva
+    id_habitacion INT REFERENCES Habitacion(id_habitacion), -- opcional: tarea ligada a habitación
+    fecha DATE NOT NULL,
+    observaciones VARCHAR(255)
+);
+
+
+-- =====================================================
+-- CORRECCIONES Y MEJORAS PARA LA BD HOTEL
+-- =====================================================
+
+-- =====================================================
+-- 1. ELIMINAR FOREIGN KEYS DUPLICADAS
+-- (las creadas automáticamente por REFERENCES)
+-- =====================================================
+
+
+-- =====================================================
+-- 2. FOREIGN KEYS PERSONALIZADAS
+-- =====================================================
+
+-- EMPLEADO
+
+ALTER TABLE Empleado
+ADD CONSTRAINT fk_res_rol
+FOREIGN KEY (id_rol)
+REFERENCES Rol(id_rol)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Empleado
+ADD CONSTRAINT fk_res_sede
+FOREIGN KEY (id_sede)
+REFERENCES Sede_Hotel(id_sede)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+-- HABITACION
+ALTER TABLE Habitacion
+ADD CONSTRAINT chk_numero
+CHECK (numero > 100);
+
+ALTER TABLE Habitacion
+ADD CONSTRAINT fk_res_tipo_habitacion
+FOREIGN KEY (id_tipo)
+REFERENCES Tipo_Habitacion(id_tipo)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Habitacion
+ADD CONSTRAINT fk_res_sede_habitacion
+FOREIGN KEY (id_sede)
+REFERENCES Sede_Hotel(id_sede)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+-- RESERVA
+
+ALTER TABLE Reserva
+ADD CONSTRAINT fk_res_cliente
+FOREIGN KEY (id_cliente)
+REFERENCES Cliente(id_cliente)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE Reserva
+ADD CONSTRAINT fk_res_habitacion
+FOREIGN KEY (id_habitacion)
+REFERENCES Habitacion(id_habitacion)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Reserva
+ADD CONSTRAINT fk_res_empleado
+FOREIGN KEY (id_empleado)
+REFERENCES Empleado(id_empleado)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+-- PAGO
+ALTER TABLE Pago
+ADD CONSTRAINT chk_fecha
+CHECK (fecha <= CURRENT_DATE);
+
+ALTER TABLE Pago
+ADD CONSTRAINT fk_pago_metodo
+FOREIGN KEY (id_metodo)
+REFERENCES MetodoPago(id_metodo)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Pago
+ADD CONSTRAINT fk_pago_reserva
+FOREIGN KEY (id_reserva)
+REFERENCES Reserva(id_reserva)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Pago
+ADD CONSTRAINT fk_pago_cliente
+FOREIGN KEY (id_cliente)
+REFERENCES Cliente(id_cliente)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+-- RESERVA_SERVICIO
+
+ALTER TABLE Reserva_Servicio
+ADD CONSTRAINT fk_reserva_servicio_reserva
+FOREIGN KEY (id_reserva)
+REFERENCES Reserva(id_reserva)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Reserva_Servicio
+ADD CONSTRAINT fk_reserva_servicio_servicio
+FOREIGN KEY (id_servicio)
+REFERENCES Servicio(id_servicio)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+-- ASIGNACION_TAREA
+
+ALTER TABLE Asignacion_Tarea
+ADD CONSTRAINT fk_asignacion_tarea_empleado
+FOREIGN KEY (id_empleado)
+REFERENCES Empleado(id_empleado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE Asignacion_Tarea
+ADD CONSTRAINT fk_asignacion_tarea_tipo_operacion
+FOREIGN KEY (id_operacion)
+REFERENCES Tipo_Operacion(id_operacion)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Asignacion_Tarea
+ADD CONSTRAINT fk_asignacion_tarea_reserva
+FOREIGN KEY (id_reserva)
+REFERENCES Reserva(id_reserva)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+ALTER TABLE Asignacion_Tarea
+ADD CONSTRAINT fk_asignacion_tarea_habitacion
+FOREIGN KEY (id_habitacion)
+REFERENCES Habitacion(id_habitacion)
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
+
+-- =====================================================
+-- 3. CHECKS Y VALIDACIONES
+-- =====================================================
+
+-- TIPO HABITACION
+ALTER TABLE Tipo_Habitacion
+ADD CONSTRAINT chk_capacidad
+CHECK (capacidad > 0);
+
+ALTER TABLE Tipo_Habitacion
+ADD CONSTRAINT chk_precio_base
+CHECK (precio_base > 0);
+
+-- HABITACION
+
+ALTER TABLE Habitacion
+ADD CONSTRAINT chk_estado_habitacion
+CHECK (
+    estado IN ('disponible', 'ocupada', 'mantenimiento')
+);
+
+-- RESERVA
+
+ALTER TABLE Reserva
+ADD CONSTRAINT chk_estado_reserva
+CHECK (
+    estado IN ('pendiente', 'confirmada', 'cancelada', 'finalizada')
+);
+
+ALTER TABLE Reserva
+ADD CONSTRAINT chk_fechas_reserva
+CHECK (fecha_fin > fecha_inicio);
+
+-- PAGO
+
+ALTER TABLE Pago
+ADD CONSTRAINT chk_monto_pago
+CHECK (monto > 0);
+
+ALTER TABLE Pago
+ADD CONSTRAINT chk_estado_pago
+CHECK (
+    estado IN ('pagado', 'pendiente', 'reembolsado')
+);
+
+-- SERVICIO
+
+ALTER TABLE Servicio
+ADD CONSTRAINT chk_costo
+CHECK (costo > 0);
+
+-- RESERVA_SERVICIO
+
+ALTER TABLE Reserva_Servicio
+ADD CONSTRAINT chk_cantidad
+CHECK (cantidad > 0);
+
+-- =====================================================
+-- 4. UNIQUE IMPORTANTES
+-- =====================================================
+
+-- CLIENTE
+ALTER TABLE Cliente
+ADD CONSTRAINT unique_doc
+UNIQUE (documento);
+
+
+ALTER TABLE Cliente
+ADD CONSTRAINT unique_correo
+UNIQUE (correo);
+
+-- HABITACION
+
+ALTER TABLE Habitacion
+ADD CONSTRAINT unique_habitacion_sede
+UNIQUE (numero, id_sede);
+
+-- RESERVA_SERVICIO
+
+ALTER TABLE Reserva_Servicio
+ADD CONSTRAINT unique_reserva_servicio
+UNIQUE (id_reserva, id_servicio);
+
+-- =====================================================
+-- 5. NOT NULL FALTANTES
+-- =====================================================
+
+ALTER TABLE Reserva_Servicio
+ALTER COLUMN cantidad SET NOT NULL;
+
+ALTER TABLE Tipo_Operacion
+ALTER COLUMN descripcion SET NOT NULL;
+
+ALTER TABLE Servicio
+ALTER COLUMN descripcion SET NOT NULL;
+
+-- =====================================================
+-- 6. DEFAULTS
+-- =====================================================
+
+ALTER TABLE Habitacion
+ALTER COLUMN estado SET DEFAULT 'disponible';
+
+ALTER TABLE Reserva
+ALTER COLUMN fecha_inicio SET DEFAULT CURRENT_DATE;
+
+ALTER TABLE Pago
+ALTER COLUMN fecha SET DEFAULT CURRENT_DATE;
+
+ALTER TABLE Reserva_Servicio
+ALTER COLUMN cantidad SET DEFAULT 1;
+
+-- =====================================================
+-- 7. CAMBIO DE TIPOS A DECIMAL
+-- =====================================================
+
+ALTER TABLE Tipo_Habitacion
+ALTER COLUMN precio_base
+TYPE DECIMAL(10,2);
+
+ALTER TABLE Pago
+ALTER COLUMN monto
+TYPE DECIMAL(10,2);
+
+ALTER TABLE Servicio
+ALTER COLUMN costo
+TYPE DECIMAL(10,2);
+
+-- =====================================================
+-- 8. TIMESTAMPS
+-- =====================================================
+
+ALTER TABLE Cliente
+ADD COLUMN fecha_creacion TIMESTAMP
+DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE Reserva
+ADD COLUMN fecha_creacion TIMESTAMP
+DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE Pago
+ADD COLUMN fecha_creacion TIMESTAMP
+DEFAULT CURRENT_TIMESTAMP;
+
+
+-- 1. vista_reservas_clientes
+
+CREATE VIEW vista_reservas_clientes AS
+SELECT 
+    r.id_reserva,
+    c.usuario AS nombre_cliente,
+    c.correo,
+    h.numero AS numero_habitacion,
+    th.nombre_tipo AS tipo_habitacion,
+    sh.nombre AS sede_hotel,
+    r.fecha_inicio,
+    r.fecha_fin,
+    r.estado AS estado_reserva
+FROM Reserva r
+JOIN Cliente c
+    ON r.id_cliente = c.id_cliente
+JOIN Habitacion h
+    ON r.id_habitacion = h.id_habitacion
+JOIN Tipo_Habitacion th
+    ON h.id_tipo = th.id_tipo
+JOIN Sede_Hotel sh
+    ON h.id_sede = sh.id_sede;
+
+-- =====================================================
+
+-- 2. vista_pagos_reservas
+
+CREATE VIEW vista_pagos_reservas AS
+SELECT
+    p.id_pago,
+    c.usuario AS cliente,
+    r.id_reserva,
+    mp.tipo AS metodo_pago,
+    p.monto,
+    p.fecha,
+    p.estado
+FROM Pago p
+JOIN Cliente c
+    ON p.id_cliente = c.id_cliente
+JOIN Reserva r
+    ON p.id_reserva = r.id_reserva
+JOIN MetodoPago mp
+    ON p.id_metodo = mp.id_metodo;
+
+-- =====================================================
+
+-- 3. vista_habitaciones_disponibles
+
+CREATE VIEW vista_habitaciones_disponibles AS
+SELECT
+    id_habitacion,
+    numero,
+    estado,
+    id_tipo,
+    id_sede
+FROM Habitacion
+WHERE estado = 'disponible'
+WITH CHECK OPTION;
+
+-- =====================================================
+
+-- 4. vista_servicios_reserva
+
+CREATE VIEW vista_servicios_reserva AS
+SELECT
+    rs.id,
+    r.id_reserva,
+    s.nombre AS servicio,
+    rs.cantidad,
+    s.costo,
+    (rs.cantidad * s.costo) AS costo_total,
+    rs.fecha_solicitud
+FROM Reserva_Servicio rs
+JOIN Reserva r
+    ON rs.id_reserva = r.id_reserva
+JOIN Servicio s
+    ON rs.id_servicio = s.id_servicio;
+
+-- =====================================================
+
+-- 5. vista_tareas_empleados
+
+CREATE VIEW vista_tareas_empleados AS
+SELECT
+    at.id_tarea,
+    e.nombre AS empleado,
+    toper.nombre AS operacion,
+    h.numero AS habitacion,
+    at.fecha,
+    at.observaciones
+FROM Asignacion_Tarea at
+JOIN Empleado e
+    ON at.id_empleado = e.id_empleado
+JOIN Tipo_Operacion toper
+    ON at.id_operacion = toper.id_operacion
+LEFT JOIN Habitacion h
+    ON at.id_habitacion = h.id_habitacion;
+
+-- =====================================================
+-- VISTAS DE REPORTE
+-- =====================================================
+
+-- 6. vista_ingresos_hotel
+
+CREATE VIEW vista_ingresos_hotel AS
+SELECT
+    COUNT(p.id_pago) AS total_pagos,
+    SUM(p.monto) AS ingresos_totales,
+    AVG(p.monto) AS promedio_pago
+FROM Pago p;
+
+-- =====================================================
+
+-- 7. vista_ocupacion_habitaciones
+
+CREATE VIEW vista_ocupacion_habitaciones AS
+SELECT
+    h.numero AS habitacion,
+    h.estado,
+    COUNT(r.id_reserva) AS total_reservas
+FROM Habitacion h
+LEFT JOIN Reserva r
+    ON h.id_habitacion = r.id_habitacion
+GROUP BY h.numero, h.estado
+ORDER BY total_reservas DESC;
+
+-- =====================================================
+
+-- 8. vista_servicios_mas_solicitados
+
+CREATE VIEW vista_servicios_mas_solicitados AS
+SELECT
+    s.nombre AS servicio,
+    COUNT(rs.id_servicio) AS veces_solicitado,
+    SUM(rs.cantidad) AS total_solicitudes
+FROM Servicio s
+JOIN Reserva_Servicio rs
+    ON s.id_servicio = rs.id_servicio
+GROUP BY s.nombre
+ORDER BY total_solicitudes DESC;
+
+-- =====================================================
+
+-- 9. vista_reservas_por_sede
+
+CREATE VIEW vista_reservas_por_sede AS
+SELECT
+    sh.nombre AS sede,
+    COUNT(r.id_reserva) AS total_reservas
+FROM Reserva r
+JOIN Habitacion h
+    ON r.id_habitacion = h.id_habitacion
+JOIN Sede_Hotel sh
+    ON h.id_sede = sh.id_sede
+GROUP BY sh.nombre
+ORDER BY total_reservas DESC;
+
+-- =====================================================
+
+-- 10. vista_empleados_operaciones
+
+CREATE VIEW vista_empleados_operaciones AS
+SELECT
+    e.nombre AS empleado,
+    COUNT(at.id_tarea) AS total_operaciones
+FROM Empleado e
+LEFT JOIN Asignacion_Tarea at
+    ON e.id_empleado = at.id_empleado
+GROUP BY e.nombre
+ORDER BY total_operaciones DESC;
+
+-- =====================================================
+-- VISTAS DE SEGURIDAD
+-- =====================================================
+
+-- 11. vista_clientes_segura
+
+CREATE VIEW vista_clientes_segura AS
+SELECT
+    id_cliente,
+    usuario,
+    correo
+FROM Cliente;
+
+-- =====================================================
+
+-- 12. vista_pagos_segura
+
+CREATE VIEW vista_pagos_segura AS
+SELECT
+    p.id_pago,
+    p.monto,
+    p.fecha,
+    p.estado,
+    mp.tipo AS metodo_pago
+FROM Pago p
+JOIN MetodoPago mp
+    ON p.id_metodo = mp.id_metodo;
+
+-- =====================================================
+
+-- 13. vista_empleados_segura
+
+CREATE VIEW vista_empleados_segura AS
+SELECT
+    e.id_empleado,
+    e.nombre,
+    r.nombre_rol,
+    sh.nombre AS sede
+FROM Empleado e
+JOIN Rol r
+    ON e.id_rol = r.id_rol
+JOIN Sede_Hotel sh
+    ON e.id_sede = sh.id_sede;
+
+
+CREATE VIEW vista_ingresos_tipo_habitacion AS
+SELECT 
+    th.nombre_tipo AS tipo_habitacion,
+    COUNT(r.id_reserva) AS total_reservas,
+    SUM(p.monto) AS ingresos_totales,
+    AVG(p.monto) AS promedio_pago
+FROM Pago p
+JOIN Reserva r
+    ON p.id_reserva = r.id_reserva
+JOIN Habitacion h
+    ON r.id_habitacion = h.id_habitacion
+JOIN Tipo_Habitacion th
+    ON h.id_tipo = th.id_tipo
+GROUP BY th.nombre_tipo
+ORDER BY ingresos_totales DESC;
+
+
+CREATE VIEW vista_habitaciones_disponibles AS
+SELECT 
+    id_habitacion,
+    numero,
+    estado,
+    id_tipo,
+    id_sede
+FROM Habitacion
+WHERE estado = 'disponible'
+WITH CHECK OPTION;
+
+-- =====================================================
+-- CREAR ROLES AGRUPADORES
+-- =====================================================
+
+CREATE ROLE rol_cliente;
+
+CREATE ROLE rol_empleado;
+
+CREATE ROLE rol_admin;
+
+-- =====================================================
+-- CREAR USUARIOS
+-- =====================================================
+
+CREATE USER cliente_app
+WITH LOGIN PASSWORD 'cliente123';
+
+CREATE USER empleado_app
+WITH LOGIN PASSWORD 'empleado123';
+
+CREATE USER admin_hotel
+WITH LOGIN PASSWORD 'admin123';
+
+-- =====================================================
+-- PERMISOS PARA CLIENTES
+-- =====================================================
+
+-- Consultar reservas
+GRANT SELECT
+ON vista_reservas_clientes
+TO rol_cliente;
+
+-- Consultar pagos seguros
+GRANT SELECT
+ON vista_pagos_segura
+TO rol_cliente;
+
+-- Solicitar servicios
+GRANT INSERT
+ON Reserva_Servicio
+TO rol_cliente;
+
+-- =====================================================
+-- PERMISOS PARA EMPLEADOS
+-- =====================================================
+
+-- Consultar habitaciones disponibles
+GRANT SELECT
+ON vista_habitaciones_disponibles
+TO rol_empleado;
+
+-- Gestionar reservas
+GRANT SELECT, INSERT, UPDATE
+ON Reserva
+TO rol_empleado;
+
+-- Registrar pagos
+GRANT SELECT, INSERT
+ON Pago
+TO rol_empleado;
+
+-- Consultar tareas
+GRANT SELECT
+ON Asignacion_Tarea
+TO rol_empleado;
+
+-- =====================================================
+-- PERMISOS PARA ADMINISTRADOR
+-- =====================================================
+
+GRANT ALL PRIVILEGES
+ON ALL TABLES IN SCHEMA public
+TO rol_admin;
+
+-- Permitir uso de secuencias SERIAL
+GRANT ALL PRIVILEGES
+ON ALL SEQUENCES IN SCHEMA public
+TO rol_admin;
+
+-- =====================================================
+-- ASIGNAR ROLES A LOS USUARIOS
+-- =====================================================
+
+GRANT rol_cliente
+TO cliente_app;
+
+GRANT rol_empleado
+TO empleado_app;
+
+GRANT rol_admin
+TO admin_hotel;
+
+GRANT rol_cliente TO CURRENT_USER;
+
+GRANT rol_empleado TO CURRENT_USER;
+
+GRANT rol_admin TO CURRENT_USER;
+
+-- =====================================================
+-- INSERTS TABLA: Sede_Hotel
+-- =====================================================
+
+INSERT INTO Sede_Hotel (nombre, direccion, telefono)
+VALUES
+('Hotel Central', 'Calle 10 #15-20', '3001111111'),
+('Hotel Norte', 'Carrera 20 #45-10', '3002222222'),
+('Hotel Plaza', 'Avenida 5 #30-50', '3003333333'),
+('Hotel Dorado', 'Calle 80 #12-40', '3004444444'),
+('Hotel Ejecutivo', 'Carrera 50 #70-15', '3005555555');
+
+-- =====================================================
+-- INSERTS TABLA: Rol
+-- =====================================================
+
+INSERT INTO Rol (nombre_rol, descripcion)
+VALUES
+('Recepcionista', 'Gestiona reservas y atención al cliente'),
+('Gerente', 'Administra el hotel'),
+('Ama de llaves', 'Supervisa limpieza'),
+('Mantenimiento', 'Realiza reparaciones'),
+('Administrador', 'Gestiona el sistema');
+
+-- =====================================================
+-- INSERTS TABLA: Empleado
+-- =====================================================
+
+INSERT INTO Empleado (nombre, id_rol, id_sede)
+VALUES
+('Carlos Ramirez', 1, 1),
+('Laura Gomez', 2, 1),
+('Andres Torres', 3, 2),
+('Maria Lopez', 4, 3),
+('Julian Castro', 5, 4);
+
+-- =====================================================
+-- INSERTS TABLA: Cliente
+-- =====================================================
+
+INSERT INTO Cliente (usuario, documento, telefono, correo)
+VALUES
+('juanperez', '100000001', '3101111111', 'juan@gmail.com'),
+('maria25', '100000002', '3102222222', 'maria@gmail.com'),
+('carlos88', '100000003', '3103333333', 'carlos@gmail.com'),
+('laura77', '100000004', '3104444444', 'laura@gmail.com'),
+('andresdev', '100000005', '3105555555', 'andres@gmail.com');
+
+-- =====================================================
+-- INSERTS TABLA: Tipo_Habitacion
+-- =====================================================
+
+INSERT INTO Tipo_Habitacion (nombre_tipo, precio_base, capacidad)
+VALUES
+('Simple', 120000, 1),
+('Doble', 180000, 2),
+('Suite', 350000, 4),
+('Familiar', 250000, 5),
+('Premium', 500000, 2);
+
+-- =====================================================
+-- INSERTS TABLA: Habitacion
+-- =====================================================
+
+INSERT INTO Habitacion (numero, estado, id_tipo, id_sede)
+VALUES
+(101, 'disponible', 1, 1),
+(102, 'ocupada', 2, 1),
+(201, 'disponible', 3, 2),
+(202, 'mantenimiento', 4, 3),
+(301, 'disponible', 5, 4);
+
+-- =====================================================
+-- INSERTS TABLA: Reserva
+-- =====================================================
+
+INSERT INTO Reserva
+(fecha_inicio, fecha_fin, estado, id_cliente, id_habitacion, id_empleado)
+VALUES
+('2026-05-10', '2026-05-12', 'confirmada', 1, 1, 1),
+('2026-05-11', '2026-05-14', 'pendiente', 2, 2, 1),
+('2026-05-15', '2026-05-18', 'cancelada', 3, 3, 2),
+('2026-05-20', '2026-05-25', 'finalizada', 4, 4, 2),
+('2026-05-22', '2026-05-28', 'confirmada', 5, 5, 1);
+
+-- =====================================================
+-- INSERTS TABLA: MetodoPago
+-- =====================================================
+
+INSERT INTO MetodoPago (tipo)
+VALUES
+('Efectivo'),
+('Tarjeta Crédito'),
+('Tarjeta Débito'),
+('Transferencia'),
+('Nequi');
+
+-- =====================================================
+-- INSERTS TABLA: Pago
+-- =====================================================
+
+INSERT INTO Pago
+(monto, fecha, estado, id_metodo, id_reserva, id_cliente)
+VALUES
+(240000, '2026-05-08', 'pagado', 1, 1, 1),
+(540000, '2026-05-09', 'pagado', 2, 2, 2),
+(350000, '2026-05-10', 'reembolsado', 3, 3, 3),
+(1250000, '2026-05-11', 'pagado', 4, 4, 4),
+(3000000, '2026-05-12', 'pendiente', 5, 5, 5);
+
+-- =====================================================
+-- INSERTS TABLA: Servicio
+-- =====================================================
+
+INSERT INTO Servicio (nombre, descripcion, costo)
+VALUES
+('Spa', 'Servicio de relajación', 80000),
+('Desayuno', 'Buffet desayuno', 30000),
+('Lavandería', 'Lavado de ropa', 50000),
+('Tour', 'Tour turístico', 120000),
+('Transporte', 'Servicio aeropuerto', 90000);
+
+-- =====================================================
+-- INSERTS TABLA: Reserva_Servicio
+-- =====================================================
+
+INSERT INTO Reserva_Servicio
+(id_reserva, id_servicio, cantidad, fecha_solicitud)
+VALUES
+(1, 1, 1, '2026-05-10'),
+(2, 2, 2, '2026-05-11'),
+(3, 3, 1, '2026-05-12'),
+(4, 4, 3, '2026-05-13'),
+(5, 5, 1, '2026-05-14');
+
+-- =====================================================
+-- INSERTS TABLA: Tipo_Operacion
+-- =====================================================
+
+INSERT INTO Tipo_Operacion (nombre, descripcion)
+VALUES
+('Check-in', 'Ingreso del cliente'),
+('Check-out', 'Salida del cliente'),
+('Limpieza', 'Limpieza de habitación'),
+('Mantenimiento', 'Reparación de habitación'),
+('Atención', 'Servicio al cliente');
+
+-- =====================================================
+-- INSERTS TABLA: Asignacion_Tarea
+-- =====================================================
+
+INSERT INTO Asignacion_Tarea
+(id_empleado, id_operacion, id_reserva, id_habitacion, fecha, observaciones)
+VALUES
+(1, 1, 1, 1, '2026-05-10', 'Check-in realizado'),
+(2, 2, 2, 2, '2026-05-11', 'Salida registrada'),
+(3, 3, 3, 3, '2026-05-12', 'Habitación limpia'),
+(4, 4, 4, 4, '2026-05-13', 'Reparación aire acondicionado'),
+(5, 5, 5, 5, '2026-05-14', 'Atención personalizada');
